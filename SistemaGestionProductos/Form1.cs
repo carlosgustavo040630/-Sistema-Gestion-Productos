@@ -139,6 +139,19 @@ namespace SistemaGestionProductos
                 return false;
             }
 
+            // NUEVAS VALIDACIONES
+            if (txtCodigo.Text.Trim().Length < 3)
+            {
+                MessageBox.Show("El código debe tener al menos 3 caracteres.");
+                return false;
+            }
+
+            if (txtNombre.Text.Trim().Length < 3)
+            {
+                MessageBox.Show("El nombre debe tener al menos 3 caracteres.");
+                return false;
+            }
+
             if (!decimal.TryParse(txtPrecio.Text, out decimal precio) || precio < 0)
             {
                 MessageBox.Show("Introduce un precio válido y no negativo.");
