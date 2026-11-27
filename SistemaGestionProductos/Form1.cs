@@ -8,6 +8,9 @@ namespace SistemaGestionProductos
 {
     public partial class Form1 : Form
     {
+        private ComboBox cmbOrdenar;
+        private Button btnOrdenar;
+        private DataView vistaProductos;
         private ProductosDAL productosDAL = new ProductosDAL();
         private TextBox txtCodigo;
         private TextBox txtNombre;
@@ -101,6 +104,25 @@ namespace SistemaGestionProductos
 
             this.Controls.Add(txtBuscar);
             this.Controls.Add(btnBuscar);
+            // Ordenamiento de productos
+            cmbOrdenar = new ComboBox();
+            cmbOrdenar.Location = new Point(420, 340);
+            cmbOrdenar.Size = new Size(180, 28);
+            cmbOrdenar.Font = new Font("Segoe UI", 10);
+            cmbOrdenar.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            cmbOrdenar.Items.Add("Nombre A-Z");
+            cmbOrdenar.Items.Add("Nombre Z-A");
+            cmbOrdenar.Items.Add("Precio menor a mayor");
+            cmbOrdenar.Items.Add("Precio mayor a menor");
+
+            cmbOrdenar.SelectedIndex = 0;
+
+            btnOrdenar = CrearBoton("Ordenar", 620, 337, Color.FromArgb(39, 174, 96));
+            btnOrdenar.Click += BtnOrdenar_Click;
+
+            this.Controls.Add(cmbOrdenar);
+            this.Controls.Add(btnOrdenar);
             lblListado.Text = "Listado de productos";
             lblListado.Font = new Font("Segoe UI", 13, FontStyle.Bold);
             lblListado.Location = new Point(30, 380);
@@ -285,21 +307,18 @@ namespace SistemaGestionProductos
             {
                 string busqueda = txtBuscar.Text.Trim();
 
-                if (string.IsNullOrWhiteSpace(busqueda))
+                DataTable tabla = productosDAL.ConsultarProductos();
+                vistaProductos = tabla.DefaultView;
+
+                if (!string.IsNullOrWhiteSpace(busqueda))
                 {
-                    CargarProductos();
-                    return;
+                    vistaProductos.RowFilter = string.Format(
+                        "Codigo LIKE '%{0}%' OR Nombre LIKE '%{0}%'",
+                        busqueda.Replace("'", "''")
+                    );
                 }
 
-                DataTable tabla = productosDAL.ConsultarProductos();
-
-                DataView vista = tabla.DefaultView;
-                vista.RowFilter = string.Format(
-                    "Codigo LIKE '%{0}%' OR Nombre LIKE '%{0}%'",
-                    busqueda.Replace("'", "''")
-                );
-
-                dgvProductos.DataSource = vista;
+                dgvProductos.DataSource = vistaProductos;
             }
             catch (Exception ex)
             {
@@ -330,6 +349,42 @@ namespace SistemaGestionProductos
             catch (Exception ex)
             {
                 MessageBox.Show("Error al registrar: " + ex.Message);
+            }
+        }
+        private void BtnOrdenar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (vistaProductos == null)
+                {
+                    DataTable tabla = productosDAL.ConsultarProductos();
+                    vistaProductos = tabla.DefaultView;
+                }
+
+                switch (cmbOrdenar.SelectedIndex)
+                {
+                    case 0:
+                        vistaProductos.Sort = "Nombre ASC";
+                        break;
+
+                    case 1:
+                        vistaProductos.Sort = "Nombre DESC";
+                        break;
+
+                    case 2:
+                        vistaProductos.Sort = "Precio ASC";
+                        break;
+
+                    case 3:
+                        vistaProductos.Sort = "Precio DESC";
+                        break;
+                }
+
+                dgvProductos.DataSource = vistaProductos;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al ordenar productos: " + ex.Message);
             }
         }
 
