@@ -143,6 +143,7 @@ namespace SistemaGestionProductos
             dgvProductos.MultiSelect = false;
 
             this.Controls.Add(dgvProductos);
+            dgvProductos.CellFormatting += DgvProductos_CellFormatting;
             CargarProductos();
 
             btnModificar.Click += BtnModificar_Click;
@@ -281,6 +282,20 @@ namespace SistemaGestionProductos
             txtStock.Clear();
 
             dgvProductos.ClearSelection();
+        }
+        private void DgvProductos_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dgvProductos.Columns[e.ColumnIndex].Name == "Stock")
+            {
+                if (e.Value != null && int.TryParse(e.Value.ToString(), out int stock))
+                {
+                    if (stock <= 5)
+                    {
+                        dgvProductos.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightCoral;
+                        dgvProductos.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.DarkRed;
+                    }
+                }
+            }
         }
 
         private void CargarProductos()
