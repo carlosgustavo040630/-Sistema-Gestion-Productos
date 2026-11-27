@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -15,6 +16,8 @@ namespace SistemaGestionProductos
         private TextBox txtStock;
 
         private DataGridView dgvProductos;
+        private TextBox txtBuscar;
+        private Button btnBuscar;
 
         private Button btnGuardar;
         private Button btnModificar;
@@ -87,16 +90,27 @@ namespace SistemaGestionProductos
 
             // Tabla de productos
             Label lblListado = new Label();
+            // Buscador de productos
+            txtBuscar = new TextBox();
+            txtBuscar.Location = new Point(30, 340);
+            txtBuscar.Size = new Size(250, 28);
+            txtBuscar.Font = new Font("Segoe UI", 10);
+
+            btnBuscar = CrearBoton("Buscar", 300, 337, Color.FromArgb(41, 128, 185));
+            btnBuscar.Click += BtnBuscar_Click;
+
+            this.Controls.Add(txtBuscar);
+            this.Controls.Add(btnBuscar);
             lblListado.Text = "Listado de productos";
             lblListado.Font = new Font("Segoe UI", 13, FontStyle.Bold);
-            lblListado.Location = new Point(30, 340);
+            lblListado.Location = new Point(30, 380);
             lblListado.Size = new Size(300, 30);
 
             this.Controls.Add(lblListado);
 
             dgvProductos = new DataGridView();
-            dgvProductos.Location = new Point(30, 380);
-            dgvProductos.Size = new Size(970, 240);
+            dgvProductos.Location = new Point(30, 420);
+            dgvProductos.Size = new Size(970, 200);
             dgvProductos.BackgroundColor = Color.White;
             dgvProductos.AutoSizeColumnsMode =
                 DataGridViewAutoSizeColumnsMode.Fill;
@@ -251,6 +265,33 @@ namespace SistemaGestionProductos
             }
             
 
+        }
+        private void BtnBuscar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string busqueda = txtBuscar.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(busqueda))
+                {
+                    CargarProductos();
+                    return;
+                }
+
+                DataTable tabla = productosDAL.ConsultarProductos();
+
+                DataView vista = tabla.DefaultView;
+                vista.RowFilter = string.Format(
+                    "Codigo LIKE '%{0}%' OR Nombre LIKE '%{0}%'",
+                    busqueda.Replace("'", "''")
+                );
+
+                dgvProductos.DataSource = vista;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al buscar productos: " + ex.Message);
+            }
         }
         private void BtnGuardar_Click(object sender, EventArgs e)
         {
