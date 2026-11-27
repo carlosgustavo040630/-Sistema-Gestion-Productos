@@ -17,6 +17,7 @@ namespace SistemaGestionProductos
         private TextBox txtDescripcion;
         private TextBox txtPrecio;
         private TextBox txtStock;
+        private Button btnLimpiarBusqueda;
 
         private DataGridView dgvProductos;
         private TextBox txtBuscar;
@@ -123,6 +124,11 @@ namespace SistemaGestionProductos
 
             this.Controls.Add(cmbOrdenar);
             this.Controls.Add(btnOrdenar);
+            // Botón para limpiar búsqueda
+            btnLimpiarBusqueda = CrearBoton("Limpiar búsqueda", 790, 337, Color.FromArgb(127, 140, 141));
+            btnLimpiarBusqueda.Click += BtnLimpiarBusqueda_Click;
+
+            this.Controls.Add(btnLimpiarBusqueda);
             lblListado.Text = "Listado de productos";
             lblListado.Font = new Font("Segoe UI", 13, FontStyle.Bold);
             lblListado.Location = new Point(30, 380);
@@ -235,7 +241,22 @@ namespace SistemaGestionProductos
                 MessageBox.Show("Error al eliminar: " + ex.Message);
             }
         }
+        private void BtnLimpiarBusqueda_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                txtBuscar.Clear();
 
+                vistaProductos = productosDAL.ConsultarProductos().DefaultView;
+                vistaProductos.Sort = "";
+
+                dgvProductos.DataSource = vistaProductos;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al limpiar la búsqueda: " + ex.Message);
+            }
+        }
         private void BtnModificar_Click(object sender, EventArgs e)
         {
             if (!ValidarCampos())
